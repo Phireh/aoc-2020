@@ -1,2 +1,5 @@
 # Ignore compiled lisp files
 **/*.fasl
+# Ignore emacs temp files
+\#*\#
+.\#*
