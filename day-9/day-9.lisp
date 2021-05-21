@@ -1,4 +1,4 @@
-(in-package :day-8)
+(in-package :day-9)
 
 (defparameter *input-file* "input")
 
