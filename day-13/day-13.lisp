@@ -30,7 +30,7 @@
 ;; Note: The inverse is only defined when a and m are coprimes, i.e. gcd(a, m) = 1.”
 ;;
 (defun invmod (a m)
-  (multiple-value-bind (r s k) (egcd a m)
+  (multiple-value-bind (r s) (egcd a m)
     (unless (= 1 r) (error "invmod: Values ~a and ~a are not coprimes." a m))  
     s))
 
@@ -39,10 +39,14 @@
 "Calculates the Chinese Remainder for the given set of integer modulo pairs.
  Note: All the ni and the N must be coprimes."
   (loop :for (a . m) :in am
-        :with mtot = (reduce #'* (mapcar #'(lambda(X) (cdr X)) am))
+        :with mtot = (if (plusp (cdar am))
+                         (reduce #'* (mapcar #'(lambda(X) (cdr X)) am))
+                         (reduce #'* (mapcar #'(lambda(X) (cdr X)) (cdr am))))
         :with sum  = 0
         :finally (return (mod sum mtot))
-        :do
+        :if (zerop m) :do
+          (incf sum a)
+        :else :do
    (incf sum (* a (invmod (/ mtot m) m) (/ mtot m)))))
 
 
@@ -51,5 +55,5 @@
          (ids (map 'list #'parse-integer (remove-if (lambda (str) (string= "x" str)) (uiop:split-string (elt input 1) :separator ","))))
          (numbers (loop :for num :in ids
                         :collect (cons num (position (write-to-string num) (uiop:split-string (elt input 1) :separator ",") :test #'string=)))))
-    (chinese-remainder (cdr numbers))))
+    (chinese-remainder numbers)))
 
