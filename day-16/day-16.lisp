@@ -39,6 +39,7 @@
         (rules '())
         (tickets '())
         (my-ticket '()))
+    
     (loop :for line :in input-lines
           :until (string= "" line)
           :do
@@ -48,9 +49,8 @@
                           (parse-integer (subseq line (1+ (search "-" line)) (search " or" line))))
                     (cons (parse-integer (subseq line (+ 4 (search " or " line)) (search "-" line :from-end t)))
                           (parse-integer (subseq line (1+ (search "-" line :from-end t))))))
-                   rules)
-          
-          )
+                   rules))
+    
     (setf tickets (loop :for line :in input-lines
                         :with reading-numbers = nil
                         :when reading-numbers            
@@ -80,6 +80,7 @@
                                                  (<= (caaddr rule) n (cdaddr rule)))) rules) n nil))
                       ticket))
                tickets)))
+    
     (setf rules
           (map 'list
                (lambda (rule) (list rule (loop :for i :below (length (first tickets))
@@ -118,9 +119,7 @@
                                                   :if (= min-pos j)
                                                     :collect r                                                                                              
                                                   :else
-                                                    :collect (list (car r) (remove n (cadr r)))) (nconc fixed-positions (list min-pos))))))
-               
-               ))
+                                                    :collect (list (car r) (remove n (cadr r)))) (nconc fixed-positions (list min-pos))))))))
       ;; end of definition
       (setf rules (decide rules)))
 
@@ -129,6 +128,4 @@
           (lambda (pos) (nth pos my-ticket))
           (map 'list
                #'caadr
-               (remove-if-not (lambda (r) (search "departure" (caar r))) rules))))
-
-    ))
+               (remove-if-not (lambda (r) (search "departure" (caar r))) rules))))))
