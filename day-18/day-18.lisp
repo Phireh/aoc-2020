@@ -35,9 +35,52 @@
       (#\)
        (return (values n i))))
 
-    :finally (return n)))
+        :finally (return n)))
+
+(defun tokenize (string)
+  (coerce (remove #\Space string) 'list))
+
+(defun shunting-yard (tokens)
+  (let ((operators '())
+        (output '()))
+    (dolist (token tokens)
+      (case token
+        ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
+         (push token output))
+        (#\*
+         (loop :while (and (consp operators) (char/= #\( (car operators)) (or (char= #\+ (car operators)) (char= #\* (car operators)))) :do (push (pop operators) output) :finally (push token operators)))
+        (#\+
+         (loop :while (and (consp operators) (char/= #\( (car operators)) (char= #\+ (car operators))) :do (push (pop operators) output) :finally (push token operators)))
+        (#\(
+         (push token operators))
+        (#\)
+         (loop :while (char/= #\( (car operators)) :do (push (pop operators) output) :finally (pop operators)))))
+
+    (loop :while (plusp (length operators)) :do (push (pop operators) output) :finally (return (reverse output)))))
+
+(defun calculate-rpn (tokens)
+  (let ((numbers '()))
+    (dolist (token tokens)
+      (case token
+        ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
+         (push (digit-char-p token) numbers))
+        (#\+
+         (push (+ (pop numbers) (pop numbers)) numbers))
+        (#\*
+         (push (* (pop numbers) (pop numbers)) numbers))))
+
+    (car numbers)))
+
+(defun calculate-line (line)
+  (calculate-rpn (shunting-yard (tokenize line))))
+
 
 (defun part-1 ()
   (let ((input (read-file)))
     (reduce #'+
             (map 'list #'calculate input))))
+
+(defun part-2 ()
+  (let ((input (read-file)))
+    (reduce #'+
+            (map 'list #'calculate-line input))))
